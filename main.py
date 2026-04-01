@@ -1,108 +1,66 @@
 from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.menu import MDDropdownMenu
 from kivy.lang import Builder
-from kivy.properties import StringProperty, ListProperty, NumericProperty, BooleanProperty
-from kivy.uix.behaviors import DragBehavior
-from kivymd.uix.label import MDLabel
-from kivymd.uix.card import MDCard
-import colorsys
+from kivy.core.text import LabelBase
 
-# Interface Canva Ultra-Stable
-KV = """
-MDFloatLayout:
-    md_bg_color: 0.05, 0.05, 0.1, 1
+# 1. ENREGISTREMENT DES POLICES
+# On le fait en dehors de la classe pour que ce soit chargé dès le début
+fonts = [
+    {"name": "Montserrat", "fn_regular": "assets/fonts/Montserrat.ttf"},
+    {"name": "Orbitron", "fn_regular": "assets/fonts/Orbitron.ttf"},
+    {"name": "Roboto", "fn_regular": "assets/fonts/Roboto.ttf"},
+    {"name": "Playfair", "fn_regular": "assets/fonts/Playfair.ttf"},
+    {"name": "OpenSans", "fn_regular": "assets/fonts/OpenSans.ttf"},
+]
 
-    MDTopAppBar:
-        title: "IdeaSpark : Studio Pro"
-        pos_hint: {"top": 1}
-        elevation: 4
-        right_action_items: [["image-plus", lambda x: app.change_photo()]]
+for font in fonts:
+    try:
+        LabelBase.register(**font)
+    except Exception as e:
+        print(f"Erreur chargement {font['name']}: {e}")
 
-    # ZONE DE TRAVAIL (CANVAS)
-    MDCard:
-        id: cover
-        size_hint: None, None
-        size: ("280dp", "420dp") if app.is_portrait else ("420dp", "280dp")
-        pos_hint: {"center_x": .5, "center_y": .6}
-        md_bg_color: app.bg_color
-        radius: [15]
-        elevation: 8
-        clip_children: False # Crucial pour que le texte ne disparaisse pas
+class CanvaScreen(MDScreen):
+    menu = None
 
-        MDFloatLayout:
-            # IMAGE DE FOND (DRAGGABLE)
-            DragImage:
-                size_hint: None, None
-                size: app.img_scale, app.img_scale
-                pos: 50, 100
-                drag_rectangle: [self.x, self.y, self.width, self.height]
-                FitImage:
-                    source: app.current_img
-                    radius: [10]
+    def open_font_menu(self, button):
+        # Liste des noms de polices pour le menu
+        font_names = ["Montserrat", "Orbitron", "Roboto", "Playfair", "OpenSans"]
+        
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": name,
+                "on_release": lambda x=name: self.apply_font(x),
+            } for name in font_names
+        ]
+        
+        self.menu = MDDropdownMenu(
+            caller=button,
+            items=menu_items,
+            width_mult=4,
+        )
+        self.menu.open()
 
-            # TITRE (TOUJOURS AU PREMIER PLAN)
-            DragLabel:
-                text: app.ebook_title if app.ebook_title else "MON TITRE"
-                size_hint: None, None
-                size: "260dp", "100dp" # Largeur fixe pour éviter le texte vertical
-                pos: 10, 280
-                drag_rectangle: [self.x, self.y, self.width, self.height]
-                halign: "center"
-                font_style: app.font_style
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-                bold: True
+    def apply_font(self, font_name):
+        # On change la police de l'élément texte sur le canva
+        # Vérifie que tu as bien 'id: label_canvas' dans ton fichier .kv
+        if "label_canvas" in self.ids:
+            self.ids.label_canvas.font_name = font_name
+        
+        if self.menu:
+            self.menu.dismiss()
 
-    # BARRE D'OUTILS (BAS)
-    MDCard:
-        size_hint_y: 0.3
-        radius: [25, 25, 0, 0]
-        md_bg_color: 0.1, 0.1, 0.15, 1
-        orientation: 'vertical'
-        padding: "15dp"
-        spacing: "10dp"
-
-        MDTextField:
-            hint_text: "Taper le titre..."
-            on_text: app.ebook_title = self.text
-            mode: "rectangle"
-
-        MDBoxLayout:
-            adaptive_height: True
-            spacing: "10dp"
-            MDRaisedButton:
-                text: "STYLE"
-                on_release: app.next_style()
-            MDRaisedButton:
-                text: "PAYSAGE" if app.is_portrait else "PORTRAIT"
-                on_release: app.is_portrait = not app.is_portrait
-
-        MDSlider:
-            min: 0
-            max: 1
-            on_value: app.update_color(self.value)
-
-<DragLabel@DragBehavior+MDLabel>
-<DragImage@DragBehavior+MDCard>
-"""
-
-class IdeaSparkStudio(MDApp):
-    bg_color = ListProperty([0.1, 0.5, 0.9, 1])
-    ebook_title = StringProperty("BUSINESS")
-    current_img = StringProperty("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500")
-    img_scale = NumericProperty(200)
-    is_portrait = BooleanProperty(True)
-    font_style = StringProperty("H4")
-
+class IdeaSparkApp(MDApp):
     def build(self):
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Blue"
-        return Builder.load_string(KV)
+        self.theme_cls.primary_palette = "DeepPurple"
+        self.theme_cls.theme_style = "Light"
+        
+        # Charge ton fichier KV ici
+        return Builder.load_file("main.kv")
 
-    def update_color(self, val):
-        rgb = colorsys.hsv_to_rgb(val, 0.7, 0.8)
-        self.bg_color = [rgb[0], rgb[1], rgb[2], 1]
-
-    def next_style(self):
+if __name__ == "__main__":
+    IdeaSparkApp().run()
         styles = ["H3", "H4", "H5", "H6", "Button"]
         idx = styles.index(self.font_style)
         self.font_style = styles[(idx + 1) % len(styles)]
