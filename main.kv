@@ -1,0 +1,55 @@
+# Définition du style des éléments dans le menu de polices
+<FontListItem>:
+    text: root.text
+    font_name: root.font_name
+
+CanvaScreen:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar:
+            title: "IdeaSpark Studio"
+            elevation: 4
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: "20dp"
+            spacing: "20dp"
+
+            # ZONE D'AFFICHAGE (Le Canva)
+            MDCard:
+                size_hint: (1, 0.7)
+                elevation: 2
+                radius: [15,]
+                md_bg_color: 1, 1, 1, 1
+                
+                MDLabel:
+                    id: label_canvas
+                    text: "Votre Design"
+                    font_name: "Roboto"
+                    font_style: "H4"
+                    halign: "center"
+
+            # ZONE DES BOUTONS
+            MDBoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: "60dp"
+                spacing: "10dp"
+
+                MDRaisedButton:
+                    text: "STYLE"
+                    icon: "format-font"
+                    size_hint_x: 1
+                    on_release: root.open_font_menu(self)
+
+                MDRaisedButton:
+                    text: "COULEUR"
+                    icon: "palette"
+                    size_hint_x: 1
+
+                MDRaisedButton:
+                    text: "TAILLE"
+                    icon: "format-size"
+                    size_hint_x: 1
+
