@@ -1,0 +1,6 @@
+kivymd
+kivy
+pillow
+plyer
+fpdf2
+
