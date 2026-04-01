@@ -1,11 +1,16 @@
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.list import OneLineListItem
 from kivy.lang import Builder
 from kivy.core.text import LabelBase
+from kivy.properties import StringProperty
 
-# 1. ENREGISTREMENT DES POLICES
-# On le fait en dehors de la classe pour que ce soit chargé dès le début
+# Classe personnalisée pour l'aperçu des polices dans le menu
+class FontListItem(OneLineListItem):
+    font_name = StringProperty()
+
+# ENREGISTREMENT DES POLICES
 fonts = [
     {"name": "Montserrat", "fn_regular": "assets/fonts/Montserrat.ttf"},
     {"name": "Orbitron", "fn_regular": "assets/fonts/Orbitron.ttf"},
@@ -18,19 +23,20 @@ for font in fonts:
     try:
         LabelBase.register(**font)
     except Exception as e:
-        print(f"Erreur chargement {font['name']}: {e}")
+        print(f"Erreur sur {font['name']}: {e}")
 
 class CanvaScreen(MDScreen):
     menu = None
 
     def open_font_menu(self, button):
-        # Liste des noms de polices pour le menu
         font_names = ["Montserrat", "Orbitron", "Roboto", "Playfair", "OpenSans"]
         
+        # On crée les items du menu avec l'aperçu visuel
         menu_items = [
             {
-                "viewclass": "OneLineListItem",
+                "viewclass": "FontListItem",
                 "text": name,
+                "font_name": name, 
                 "on_release": lambda x=name: self.apply_font(x),
             } for name in font_names
         ]
@@ -43,8 +49,7 @@ class CanvaScreen(MDScreen):
         self.menu.open()
 
     def apply_font(self, font_name):
-        # On change la police de l'élément texte sur le canva
-        # Vérifie que tu as bien 'id: label_canvas' dans ton fichier .kv
+        # Change la police du label qui a l'id 'label_canvas'
         if "label_canvas" in self.ids:
             self.ids.label_canvas.font_name = font_name
         
@@ -55,19 +60,7 @@ class IdeaSparkApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "DeepPurple"
         self.theme_cls.theme_style = "Light"
-        
-        # Charge ton fichier KV ici
         return Builder.load_file("main.kv")
 
 if __name__ == "__main__":
     IdeaSparkApp().run()
-        styles = ["H3", "H4", "H5", "H6", "Button"]
-        idx = styles.index(self.font_style)
-        self.font_style = styles[(idx + 1) % len(styles)]
-
-    def change_photo(self):
-        self.current_img = "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=500"
-
-if __name__ == "__main__":
-    IdeaSparkStudio().run()
-
